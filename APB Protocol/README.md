@@ -5,7 +5,7 @@
 - Technology & Tools Used: System Verilog,UVM, ModelSim, Xilinx Vivado.
 - Applications: Facilitates reliable communication between microcontrollers and peripheral devices in embedded systems.
 
-### Overview of APB Protocol
+# **Overview of APB Protocol**
 
 The Advanced Microcontroller Bus Architecture (AMBA) specifies protocols for interfacing components and peripherals in a system-on-chip (SoC) design. Among the AMBA protocols, the Advanced Peripheral Bus (APB) protocol is primarily designed for low-bandwidth and low-power peripheral devices. Here is an overview of the APB protocol:
 
