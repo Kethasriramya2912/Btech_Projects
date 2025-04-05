@@ -54,7 +54,7 @@ Timer/counter peripherals
 Control registers
 General-purpose input/output (GPIO) ports
 
-**Here are some common interview questions related to the Advanced Peripheral Bus (APB) protocol, along with their answers:**
+## **Here are some common interview questions related to the Advanced Peripheral Bus (APB) protocol, along with their answers:**
 
 Question 1: How does a typical transaction work in the APB protocol?
 Answer:
