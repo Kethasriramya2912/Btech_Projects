@@ -49,9 +49,10 @@ When implementing AES for secure data transmission, consider the following:
 
 - Key Management: Securely exchanging and managing the AES key is critical. Use protocols like Diffie-Hellman for key exchange.
 - Initialization Vectors (IV): For modes like CBC and GCM, use an unpredictable random IV for each session to enhance security.
-Message Authentication: Employ message authentication codes (MAC) or use modes like GCM that incorporate integrity checks to prevent tampering.
-Security Best Practices: Regularly update and rotate keys, use strong key sizes (at least 128 bits), and follow security standards for implementation.
+- Message Authentication: Employ message authentication codes (MAC) or use modes like GCM that incorporate integrity checks to prevent tampering.
+- Security Best Practices: Regularly update and rotate keys, use strong key sizes (at least 128 bits), and follow security standards for implementation.
+
 7. Applications of AES
-Secure Communication: Used in SSL/TLS protocols for secure web communication.
-File Encryption: Protecting sensitive files stored on disks or transmitted over networks.
-VPN Services: Encrypting data transferred over Virtual Private Networks.
+- Secure Communication: Used in SSL/TLS protocols for secure web communication.
+- File Encryption: Protecting sensitive files stored on disks or transmitted over networks.
+- VPN Services: Encrypting data transferred over Virtual Private Networks.
