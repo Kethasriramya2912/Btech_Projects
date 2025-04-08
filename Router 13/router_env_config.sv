@@ -1,0 +1,31 @@
+/******************************
+Filename:router_env_config.sv
+Version:1.0
+Author:Avi
+******************************/
+
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+
+class router_env_config extends uvm_object;
+
+    router_wr_agent_config wr_agt_cfg_h[];
+    router_rd_agent_config rd_agt_cfg_h[];
+//    router_scoreboard sb[];
+    //router_virtual_sequencer v_sequencer; 
+
+ 
+    bit has_wagent=1;
+    bit has_ragent=1;
+    int no_of_ragents;
+    int no_of_wagents;
+    bit has_scoreboard=1;
+    bit has_virtual_sequencer=1;
+ 
+   `uvm_object_utils(router_env_config)
+ 
+    function new(string name="router_env_config");
+         super.new(name);
+    endfunction
+
+endclass:router_env_config

@@ -1,0 +1,82 @@
+/************************************
+Filename:router_wr_monitor.sv
+Version:1.0
+Author:Avi
+
+Doubts:
+
+Comments:
+  write task collect_data and run_phase
+************************************/
+
+
+class router_wr_monitor extends uvm_monitor;
+
+    `uvm_component_utils(router_wr_monitor)
+
+     uvm_analysis_port#(write_xtn) wm_port;
+ 
+     virtual router_if.WR_MON wr_if;
+     router_wr_agent_config wr_agt_cfg_h;
+
+     int write_xtns_count;
+
+     extern function new(string name="router_wr_monitor",uvm_component parent);
+     extern function void build_phase(uvm_phase phase);
+     extern function void connect_phase(uvm_phase phase);
+     extern task run_phase(uvm_phase phase);
+     extern task collect_data();
+     extern function void report_phase(uvm_phase phase);
+  
+endclass
+
+    function router_wr_monitor::new(string name="router_wr_monitor",uvm_component parent);
+          super.new(name,parent);
+    endfunction
+
+    function void router_wr_monitor::build_phase(uvm_phase phase);
+         if(!uvm_config_db#(router_wr_agent_config)::get(this,"","router_wr_agent_config",wr_agt_cfg_h))
+             `uvm_fatal("router_wr_monitor","unable to get write config, have you set it?")
+         wm_port=new("wm_port",this);
+         super.build_phase(phase);
+    endfunction
+
+    function void router_wr_monitor::connect_phase(uvm_phase phase);
+        wr_if=wr_agt_cfg_h.wr_if;
+    endfunction
+
+   task router_wr_monitor::run_phase(uvm_phase phase);
+      // `uvm_info("router_wr_monitor","run_phase of wr monitor",UVM_LOW)
+       forever
+           begin
+               collect_data();
+               write_xtns_count++;
+           end
+   endtask
+
+   task router_wr_monitor::collect_data();
+        write_xtn xtn;
+begin
+        xtn=write_xtn::type_id::create("xtn"); 
+            @(wr_if.wr_cb_mon);
+              wait((!wr_if.wr_cb_mon.busy) && (wr_if.wr_cb_mon.pkt_valid==1)) 
+           xtn.header=wr_if.wr_cb_mon.data_in;
+            xtn.payload=new[xtn.header[7:2]];
+            @(wr_if.wr_cb_mon);
+            foreach(xtn.payload[i])
+                begin
+                    wait(!wr_if.wr_cb_mon.busy)                       
+                     xtn.payload[i]=wr_if.wr_cb_mon.data_in;
+                    @(wr_if.wr_cb_mon);
+                end
+             wait((!wr_if.wr_cb_mon.busy) && (wr_if.wr_cb_mon.pkt_valid==0))
+                   xtn.parity=wr_if.wr_cb_mon.data_in;
+        wm_port.write(xtn);
+        xtn.print();
+       @(wr_if.wr_cb_mon);
+end
+   endtask
+
+  function void router_wr_monitor::report_phase(uvm_phase phase);
+       `uvm_info("No of write transaction received by write monitor",$sformatf("%0d",write_xtns_count),UVM_LOW)
+  endfunction

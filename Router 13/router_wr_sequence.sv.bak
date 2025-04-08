@@ -1,0 +1,135 @@
+/*************************************
+Filename:router_wr_sequence.sv
+Version:1.0
+Author:Avi
+Doubts:
+Comments:
+      Define write xtn
+      Define other write sequences
+*************************************/
+
+
+class base_wr_sequence extends uvm_sequence #(write_xtn);
+     bit[1:0] address;
+    `uvm_object_utils(base_wr_sequence)
+     extern function new(string name="base_wr_sequence");
+    // extern task body();
+endclass
+
+    function base_wr_sequence::new(string name="base_wr_sequence");
+        super.new(name);
+    endfunction
+
+   // task base_wr_sequence::body(); 
+    //  uvm_config_db#(int)::dump();
+    //  if(!uvm_config_db#(bit[1:0])::get(null,"*v_sequencer*","bit[1:0]",address))
+      //    `uvm_fatal("base_wr_sequence","unable to find address, have you set it?")
+  //  endtask
+
+class wr_sequence0 extends base_wr_sequence;
+    `uvm_object_utils(wr_sequence0)
+     extern function new(string name="wr_sequence0");
+     extern task body();
+endclass
+
+     function wr_sequence0::new(string name="wr_sequence0");
+         super.new(name);
+     //    `uvm_info("wr_sequence0","object is created",UVM_LOW)
+     endfunction
+    
+     task wr_sequence0::body();
+     //super.body();
+       //  `uvm_info("wr_sequence0","executing task body",UVM_LOW)
+         req=write_xtn::type_id::create("req");
+    repeat(3)
+         begin
+         start_item(req); 
+        // uvm_config_db#(int)::dump();
+         if(!uvm_config_db#(bit[1:0])::get(null,get_full_name(),"bit[1:0]",address))
+           `uvm_fatal("base_wr_sequence","unable to find address, have you set it?")
+         assert(req.randomize with {header[7:2]==14; header[1:0]==address;});
+         finish_item(req);
+         end
+     endtask
+
+
+class large_packet_sequence extends base_wr_sequence;
+    `uvm_object_utils(large_packet_sequence)
+     extern function new(string name="large_packet_sequence");
+     extern task body();
+endclass
+
+     function large_packet_sequence::new(string name="large_packet_sequence");
+         super.new(name);
+     //    `uvm_info("wr_sequence0","object is created",UVM_LOW)
+     endfunction
+    
+     task large_packet_sequence::body();
+     //super.body();
+       //  `uvm_info("wr_sequence0","executing task body",UVM_LOW)
+         req=write_xtn::type_id::create("req");
+       repeat(10)
+         begin
+         start_item(req); 
+        // uvm_config_db#(int)::dump();
+         if(!uvm_config_db#(bit[1:0])::get(null,get_full_name(),"bit[1:0]",address))
+           `uvm_fatal("large_packet_sequence","unable to find address, have you set it?")
+         assert(req.randomize with {header[7:2] inside {[16:63]}; header[1:0]==address;});
+         finish_item(req);
+         end
+     endtask
+
+
+
+class small_packet_sequence extends base_wr_sequence;
+    `uvm_object_utils(small_packet_sequence)
+     extern function new(string name="small_packet_sequence");
+     extern task body();
+endclass
+
+     function small_packet_sequence::new(string name="small_packet_sequence");
+         super.new(name);
+     //    `uvm_info("wr_sequence0","object is created",UVM_LOW)
+     endfunction
+    
+     task small_packet_sequence::body();
+     //super.body();
+       //  `uvm_info("wr_sequence0","executing task body",UVM_LOW)
+         req=write_xtn::type_id::create("req");
+      repeat(10)
+         begin
+         start_item(req); 
+        // uvm_config_db#(int)::dump();
+         if(!uvm_config_db#(bit[1:0])::get(null,get_full_name(),"bit[1:0]",address))
+           `uvm_fatal("small_packet_sequence","unable to find address, have you set it?")
+         assert(req.randomize with {header[7:2] inside {[1:13]}; header[1:0]==address;});
+         finish_item(req);
+         end
+     endtask
+
+
+class packet_14_sequence extends base_wr_sequence;
+    `uvm_object_utils(packet_14_sequence)
+     extern function new(string name="packet_14_sequence");
+     extern task body();
+endclass
+
+     function packet_14_sequence::new(string name="packet_14_sequence");
+         super.new(name);
+     //    `uvm_info("wr_sequence0","object is created",UVM_LOW)
+     endfunction
+    
+     task packet_14_sequence::body();
+     //super.body();
+       //  `uvm_info("wr_sequence0","executing task body",UVM_LOW)
+         req=write_xtn::type_id::create("req");
+    repeat(10)
+         begin
+         start_item(req); 
+        // uvm_config_db#(int)::dump();
+         if(!uvm_config_db#(bit[1:0])::get(null,get_full_name(),"bit[1:0]",address))
+           `uvm_fatal("packet_14_sequence","unable to find address, have you set it?")
+         assert(req.randomize with {header[7:2]==14; header[1:0]==address;});
+         finish_item(req);
+         end
+     endtask

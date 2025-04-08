@@ -1,0 +1,192 @@
+/*************************************
+Filename:router_testcases.sv
+Version:1.0
+Author:Avi
+Description:all the testcases will be defined here
+*************************************/
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+
+
+class router_base_test extends uvm_test;
+    
+    router_env_config env_cfg_h;
+    router_wr_agent_config wr_agt_cfg_h[];
+    router_rd_agent_config rd_agt_cfg_h[];
+
+    int no_of_wagents=1;
+    int no_of_ragents=3;    
+    
+    bit has_ragent=1;
+    bit has_wagent=1;
+    bit has_scoreboard=1;
+    router_env envh;
+
+    bit [1:0] address;
+    `uvm_component_utils(router_base_test)
+   
+    extern function new(string name="ram_base_test",uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+   // extern function start_of_simulation_phase(uvm_phase phase);
+   // extern task run_phase(uvm_phase phase);
+endclass
+
+    function router_base_test::new(string name="ram_base_test",uvm_component parent);
+        super.new(name,parent);
+    endfunction
+
+    function void router_base_test::build_phase(uvm_phase phase);
+         address={$urandom}%3;
+      //   address=4;
+         uvm_config_db#(bit[1:0])::set(this,"*","bit[1:0]",address);
+         env_cfg_h=router_env_config::type_id::create("env_cfg_h");
+         if(has_wagent)
+             begin
+                 wr_agt_cfg_h=new[no_of_wagents];
+                 env_cfg_h.wr_agt_cfg_h=new[no_of_wagents];
+                 foreach(wr_agt_cfg_h[i])
+                     begin
+                         wr_agt_cfg_h[i]=router_wr_agent_config::type_id::create($sformatf("wr_agt_cfg_h[%0d]",i));
+                         wr_agt_cfg_h[i].is_active=UVM_ACTIVE;     
+                         if(!uvm_config_db #(virtual router_if)::get(this,"",$sformatf("wr_if%0d",i),wr_agt_cfg_h[i].wr_if))
+                             `uvm_fatal("Router_Base_Test","Unable to get write interface, have you set it?")
+                         env_cfg_h.wr_agt_cfg_h[i]=wr_agt_cfg_h[i];
+                     end
+             end
+       
+        if(has_ragent)
+            begin
+                rd_agt_cfg_h=new[no_of_ragents];
+                env_cfg_h.rd_agt_cfg_h=new[no_of_ragents];
+                foreach(rd_agt_cfg_h[i])
+                    begin
+                        rd_agt_cfg_h[i]=router_rd_agent_config::type_id::create($sformatf("rd_agt_cfg_h[%0d]",i));
+                        rd_agt_cfg_h[i].is_active=UVM_ACTIVE;
+                        if(!uvm_config_db #(virtual router_if)::get(this,"",$sformatf("rd_if%0d",i),rd_agt_cfg_h[i].rd_if))
+                             `uvm_fatal("Router_Base_Test","Unable to get read interface, have you set it?")
+                        env_cfg_h.rd_agt_cfg_h[i]=rd_agt_cfg_h[i];
+                    end
+            end
+         env_cfg_h.has_wagent=has_wagent;
+         env_cfg_h.has_ragent=has_ragent;
+         env_cfg_h.has_scoreboard=has_scoreboard;
+         env_cfg_h.no_of_ragents=no_of_ragents;
+         env_cfg_h.no_of_wagents=no_of_wagents;
+         uvm_config_db#(router_env_config)::set(this,"*","router_env_config",env_cfg_h);
+         super.build();   //is it necessary to call this here, can't we call this before or at the end? 
+         envh=router_env::type_id::create("envh",this);
+    endfunction
+
+class write_test extends router_base_test;
+   
+   virtual_sequence0 v_seq0;
+   `uvm_component_utils(write_test)
+ 
+   function new(string name="write_test", uvm_component parent);
+       super.new(name,parent);
+   endfunction
+ 
+   function void build_phase(uvm_phase phase);
+       super.build_phase(phase);
+   endfunction
+  
+  task run_phase(uvm_phase phase);
+       phase.raise_objection(this);
+       v_seq0=virtual_sequence0::type_id::create("v_seq0");
+       v_seq0.start(envh.v_sequencer);
+       //`uvm_info("executing write_test's","run_phase",UVM_LOW)
+       phase.drop_objection(this);
+  endtask
+endclass
+
+
+class large_write_test extends router_base_test;
+   
+   large_packet_vs v_seq0;
+   `uvm_component_utils(large_write_test)
+ 
+   function new(string name="large_write_test", uvm_component parent);
+       super.new(name,parent);
+   endfunction
+ 
+   function void build_phase(uvm_phase phase);
+       super.build_phase(phase);
+   endfunction
+  
+  task run_phase(uvm_phase phase);
+       phase.raise_objection(this);
+       v_seq0=large_packet_vs::type_id::create("v_seq0");
+       v_seq0.start(envh.v_sequencer);
+       //`uvm_info("executing write_test's","run_phase",UVM_LOW)
+       phase.drop_objection(this);
+  endtask
+endclass
+
+
+class small_write_test extends router_base_test;
+   
+   small_packet_vs v_seq0;
+   `uvm_component_utils(small_write_test)
+ 
+   function new(string name="small_write_test", uvm_component parent);
+       super.new(name,parent);
+   endfunction
+ 
+   function void build_phase(uvm_phase phase);
+       super.build_phase(phase);
+   endfunction
+  
+  task run_phase(uvm_phase phase);
+       phase.raise_objection(this);
+       v_seq0=small_packet_vs::type_id::create("v_seq0");
+       v_seq0.start(envh.v_sequencer);
+       //`uvm_info("executing write_test's","run_phase",UVM_LOW)
+       phase.drop_objection(this);
+  endtask
+endclass
+
+
+class write_14_test extends router_base_test;
+   
+   packet_14_vs v_seq0;
+   `uvm_component_utils(write_14_test)
+ 
+   function new(string name="write_14_test", uvm_component parent);
+       super.new(name,parent);
+   endfunction
+ 
+   function void build_phase(uvm_phase phase);
+       super.build_phase(phase);
+   endfunction
+  
+  task run_phase(uvm_phase phase);
+       phase.raise_objection(this);
+       v_seq0=packet_14_vs::type_id::create("v_seq0");
+       v_seq0.start(envh.v_sequencer);
+       //`uvm_info("executing write_test's","run_phase",UVM_LOW)
+       phase.drop_objection(this);
+  endtask
+endclass
+
+
+class soft_reset_test extends router_base_test;
+   
+   soft_reset_vs v_seq0;
+   `uvm_component_utils(soft_reset_test)
+ 
+   function new(string name="soft_reset_test", uvm_component parent);
+       super.new(name,parent);
+   endfunction
+ 
+   function void build_phase(uvm_phase phase);
+       super.build_phase(phase);
+   endfunction
+  
+  task run_phase(uvm_phase phase);
+       phase.raise_objection(this);
+       v_seq0=soft_reset_vs::type_id::create("v_seq0");
+       v_seq0.start(envh.v_sequencer);
+       //`uvm_info("executing write_test's","run_phase",UVM_LOW)
+       phase.drop_objection(this);
+  endtask
+endclass

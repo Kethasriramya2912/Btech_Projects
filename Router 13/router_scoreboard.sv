@@ -1,0 +1,155 @@
+/**********************************
+Filename:router_scoreboard.sv
+Version:1.0
+Author:Avi
+Comments:
+**********************************/
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+
+
+class router_scoreboard extends uvm_scoreboard;
+   `uvm_component_utils(router_scoreboard)
+
+    uvm_tlm_analysis_fifo#(write_xtn) fifo_wrh[];
+    uvm_tlm_analysis_fifo#(read_xtn) fifo_rdh[];
+
+    write_xtn wr_data;
+    read_xtn rd_data;
+
+    router_env_config env_cfg_h;
+   
+    static int wr_xtns_count,rd_xtns_count, xtns_compared,xtns_dropped;  
+    extern function new(string name="router_scoreboard", uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+    extern task run_phase(uvm_phase phase);
+    extern function void report_phase(uvm_phase phase);
+   //extern function void  check_phase(uvm_phase phase);
+    extern function void check_packet(read_xtn rd_data);
+endclass
+
+    function router_scoreboard::new(string name="router_scoreboard",uvm_component parent);
+        super.new(name,parent);
+    endfunction
+ 
+    function void router_scoreboard::build_phase(uvm_phase phase);
+         if(!uvm_config_db#(router_env_config)::get(this,"","router_env_config",env_cfg_h))
+             `uvm_error("router_scoreboard","unable to get router config, have you set it?")
+       //wr_data=new[env_cfg_h.no_of_wagents];
+       //rd_data=new[env_cfg_h.no_of_ragents];
+         fifo_rdh=new[env_cfg_h.no_of_ragents];
+         fifo_wrh=new[env_cfg_h.no_of_wagents];
+
+         foreach(fifo_rdh[i])
+             fifo_rdh[i]=new($sformatf("fifo_rdh[%0d]",i),this);
+
+         foreach(fifo_wrh[i])
+             fifo_wrh[i]=new($sformatf("fifo_wrh[%0d]",i),this);
+
+         super.build_phase(phase);
+    endfunction   
+    
+
+   task router_scoreboard::run_phase(uvm_phase phase);
+     //  `uvm_info("router_scoreboard","entering run_phase",UVM_LOW)
+       fork
+           begin
+	forever begin
+               fifo_wrh[0].get(wr_data);
+               wr_xtns_count++;
+           end
+	end
+
+           begin
+	forever begin
+               fork:read_part
+                   begin
+                       fifo_rdh[0].get(rd_data);
+                       rd_xtns_count++;
+                       check_packet(rd_data);
+                     //  rd_data.print();
+                   end
+                   begin
+                       fifo_rdh[1].get(rd_data);
+                       rd_xtns_count++;
+                       check_packet(rd_data);
+                     //  rd_data.print();
+                   end
+                   begin
+                      fifo_rdh[2].get(rd_data);
+                      rd_xtns_count++;
+                      check_packet(rd_data);
+                     // rd_data.print();
+                   end
+               join_any
+               disable read_part;
+            //   check_packet(rd_data);
+           end
+end
+       join
+   endtask
+/*
+   function void router_scoreboard::check_phase(uvm_phase phase);
+       if(wr_data.header!=rd_data.header)
+           begin
+               `uvm_error("header","read and write header mismatch")
+                xtns_dropped++;
+           end
+       else
+          begin
+              foreach(rd_data.payload[i])
+                  begin
+                      if(wr_data.payload[i]!=rd_data.payload[i])
+                          begin 
+                              `uvm_error("payload",$sformatf("payload[%0d] mismatch",i))
+                              xtns_dropped++;
+                          end
+                  end
+              if(wr_data.parity!=rd_data.parity) 
+                  begin
+                     `uvm_error("parity","read and write parity mismatch")
+                      xtns_dropped++;
+                  end
+          end
+       xtns_compared++;
+       wr_data.print();
+       rd_data.print();
+       `uvm_info("scoreboard","----------------compare_successful--------------",UVM_LOW)  
+   endfunction
+*/
+
+   function void router_scoreboard::check_packet(read_xtn rd_data);
+       if(wr_data.header!=rd_data.header)
+           begin
+               `uvm_error("header","read and write header mismatch")
+                xtns_dropped++;
+           end
+       else
+          begin
+              foreach(rd_data.payload[i])
+                  begin
+                      if(wr_data.payload[i]!=rd_data.payload[i])
+                          begin 
+                              `uvm_error("payload",$sformatf("payload[%0d] mismatch",i))
+                              xtns_dropped++;
+                          end
+                  end
+              if(wr_data.parity!=rd_data.parity) 
+                  begin
+                     `uvm_error("parity","read and write parity mismatch")
+                      xtns_dropped++;
+                  end
+          end
+       xtns_compared++;
+      // wr_data.print();
+      // rd_data.print();
+       `uvm_info("scoreboard","----------------compare_successful--------------",UVM_LOW)  
+   endfunction
+
+
+  function void router_scoreboard::report_phase(uvm_phase phase);
+      `uvm_info("No_of_write_packets received in Scoreboard:",$sformatf("%0d",wr_xtns_count),UVM_LOW) 
+      `uvm_info("No_of_read_packets received in Scoreboard:",$sformatf("%0d",rd_xtns_count),UVM_LOW) 
+      `uvm_info("No_of_packets compared:",$sformatf("%0d",xtns_compared),UVM_LOW)
+      `uvm_info("No_of_packets dropped:",$sformatf("%0d",xtns_dropped),UVM_LOW)
+  endfunction
